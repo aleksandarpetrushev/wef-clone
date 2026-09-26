@@ -2,5 +2,5 @@ class Follow < ApplicationRecord
   belongs_to :user
   belongs_to :topic
 
-  validates :user_id, uniqueness: { scope: :topic_id }
+  has_one :notification, dependent: :destroy
 end

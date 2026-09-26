@@ -6,6 +6,9 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :my_forum, path: "my-forum" do
       resource :feed, only: :show
+      resources :topics, only: [] do
+        resource :follow, only: :create
+      end
     end
   end
 end

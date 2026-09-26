@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_26_111401) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_26_141501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -29,6 +29,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_26_111401) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "audit_logs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "action", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id"], name: "index_audit_logs_on_record"
+    t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
+
   create_table "follows", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "topic_id", null: false
@@ -37,6 +48,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_26_111401) do
     t.index ["topic_id"], name: "index_follows_on_topic_id"
     t.index ["user_id", "topic_id"], name: "index_follows_on_user_id_and_topic_id", unique: true
     t.index ["user_id"], name: "index_follows_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "follow_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["follow_id"], name: "index_notifications_on_follow_id"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "topics", force: :cascade do |t|
@@ -51,6 +71,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_26_111401) do
 
   add_foreign_key "article_topics", "articles"
   add_foreign_key "article_topics", "topics"
+  add_foreign_key "audit_logs", "users"
   add_foreign_key "follows", "topics"
   add_foreign_key "follows", "users"
+  add_foreign_key "notifications", "follows"
+  add_foreign_key "notifications", "users"
 end
