@@ -1,23 +1,31 @@
 module Topics
   class Follow
-    def initialize(user, topic)
+    def initialize(user:, topic:)
       @user = user
       @topic = topic
     end
 
     def call
-      follow = @user.follows.create!(topic: @topic)
+      ApplicationRecord.transaction do
+        follow = @user.follows.create_or_find_by!(
+          topic: @topic
+        )
 
-      Notification.create!(
-        user: @user,
-        follow: follow
-      )
+        return false unless follow.previously_new_record?
 
-      AuditLog.create!(
-        user: @user,
-        action: "topic_followed",
-        record: @topic
-      )
+        Notification.create!(
+          user: @user,
+          follow: follow
+        )
+
+        AuditLog.create!(
+          user: @user,
+          action: "topic_followed",
+          record: @topic
+        )
+
+        true
+      end
     end
   end
 end

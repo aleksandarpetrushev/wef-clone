@@ -4,14 +4,10 @@ module Api
       def create
         topic = Topic.find(params[:topic_id])
 
-        ApplicationRecord.transaction do
-          Topics::Follow.new(current_user, topic).call
-        end
+        created = Topics::Follow.new(user: current_user, topic: topic).call
 
-        FollowNotificationJob.perform_later(current_user.id, topic.id)
+        FollowNotificationJob.perform_later(current_user.id, topic.id) if created
 
-        head :no_content
-      rescue ActiveRecord::RecordNotUnique
         head :no_content
       end
     end
